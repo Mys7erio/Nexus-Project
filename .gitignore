@@ -14,7 +14,6 @@ dist-ssr
 
 # secrets
 .env
-firebase.js
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
