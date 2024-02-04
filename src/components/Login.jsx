@@ -19,13 +19,14 @@ import MarkunreadIcon from '@mui/icons-material/Markunread';
 import Divider from '@mui/material/Divider';
 import { firestore } from "../firebase";
 import { addDoc, collection } from "@firebase/firestore";
-
-
+import { useNavigate } from 'react-router-dom';
 // import { Typography } from '@mui/material';
 
 import "./Style/login.css"
 import GoogleIcon from "./assets/google.svg";
-
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../firebase';
 
 const SubmitButton = styled(Button)({
     backgroundColor: '#008080',
@@ -52,46 +53,59 @@ function Login() {
     const [showPassword, setShowPassword] = React.useState(false);
     const [action, setAction] = React.useState("Sign Up");
     const [email, setEmail] = React.useState()
+    const [name1, setName] = React.useState()
+
     const [password, setPassword] = React.useState()
     const [emailError, setEmailError] = React.useState(false)
     const [passwordError, setPasswordError] = React.useState(false)
     const emailref = collection(firestore, "emails");
     const passwordref = collection(firestore, "passwords");
+    const navigate = useNavigate();
 
   const handleClickShowPassword = () => setShowPassword((show) => !show);
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    setEmailError(false)
-    setPasswordError(false)
+  const handleSubmit = async (event) => {
+    event.preventDefault(); 
 
-    if (email === '') {
-        setEmailError(true)
-    }else { 
-        let datae = {
-            message: email, 
-        };
+    if (action === 'Sign In') {
         try {
-            addDoc(emailref,datae);
-        } 
-        catch (e){
-            console.log(e);
+            const userCredential = await signInWithEmailAndPassword(auth,email,password);
+            console.log(userCredential);
+            const user = userCredential.user;
+            localStorage.setItem('token',user.accessToken);
+            localStorage.setItem('user',JSON.stringify(user));
+            navigate('/')
         }
-
-    }
-    if (password === '') {
-        setPasswordError(true)
-    }else{
-        let data = {
-            message: password, 
-        };
-        try {
-            addDoc(passwordref,data);
-        } 
         catch (e) {
-            console.log(e);
+            console.error(e);
         }
     }
-}
+    else {
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth,email,password);
+            console.log(userCredential);
+            const user = userCredential.user;
+            localStorage.setItem('token',user.accessToken);
+            localStorage.setItem('user',JSON.stringify(user));
+            navigate('/')
+        }
+        catch (e) {
+            console.error(e);
+    }
+    }
+    let datae = {
+        message: email, 
+    };
+    let data = {
+        message: password, 
+    };
+    try {
+        addDoc(emailref,datae);
+        addDoc(passwordref,data);
+    } 
+    catch (e){
+        console.log(e);
+    }
+};
 
   const handleMouseDownPassword = (event) => {
     event.preventDefault();
@@ -116,6 +130,10 @@ function Login() {
                         <InputLabel htmlFor="outlined-adornment-name">Your Name</InputLabel>
                         <OutlinedInput
                             id="outlined-adornment-name"
+                            type='name'
+                            onChange={e => setName(e.target.value)}
+
+                            value={name1}
                             // value={values.amount}
                             // onChange={handleChange}
                             endAdornment={
