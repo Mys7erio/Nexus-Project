@@ -1,6 +1,6 @@
 import React from 'react'
-import { Outlet } from 'react-router-dom';
-import Login from './Login';
+import { Navigate } from 'react-router-dom';
+
 import Home from './home'
 const Protected = () => {
   const token = localStorage.getItem('token');
